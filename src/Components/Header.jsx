@@ -1,8 +1,11 @@
 import { Button, Typography } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { logoutRequest } from "../ApiRequests/apiRequests";
 
 const Header = () => {
-  const isAuth = false;
+  const isAuth = useSelector((state) => state.user.isAuth);
+  const dispatch = useDispatch();
 
   return (
     <header className="header-wrapper">
@@ -33,6 +36,7 @@ const Header = () => {
                   background: "white",
                   color: "black",
                 }}
+                onClick={() => dispatch(logoutRequest())}
               >
                 <Link style={{ color: "black", textDecoration: "none" }} to="/">
                   Log Out

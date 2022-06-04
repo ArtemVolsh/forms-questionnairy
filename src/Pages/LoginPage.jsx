@@ -22,8 +22,8 @@ export const LoginPage = () => {
         type="password"
         placeholder="Пароль"
       />
-      <button onClick={dispatch(login(email, password))}>Логин</button>
-      <button onClick={dispatch(registration(email, password))}>
+      <button onClick={() => dispatch(login(email, password))}>Логин</button>
+      <button onClick={() => dispatch(registration(email, password))}>
         Регистрация
       </button>
     </div>
