@@ -12,6 +12,7 @@ const MainPage = () => {
         }}
       >
         <h1 style={{ marginBottom: "15px" }}>Forms</h1>
+				
       </Container>
     </div>
   );
