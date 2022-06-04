@@ -1,0 +1,4 @@
+DB_CONSTRING=
+PORT=5000
+JWT_ACCESS=jwt_secret_access
+JWT_REFRESH=jwt_secret_refresh
