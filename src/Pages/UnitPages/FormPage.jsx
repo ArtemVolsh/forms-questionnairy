@@ -28,6 +28,7 @@ import {
 } from "@mui/icons-material";
 
 import { FormInput } from "../../Components/FormInput";
+import { combineReducers } from "redux";
 
 export const questionTypes = {
   TEXT: "TEXT",
@@ -126,15 +127,18 @@ export const FormPage = () => {
   const handleInputCopy = (e, Id) => {
     setForm((prevState) => {
       const idx = form.questions.findIndex((item) => item.questionId === Id);
-      
-			const newQuestion = prevState.questions[idx];
-      newQuestion.questionId = genId();
 
-      prevState.questions.splice(idx + 1, 0, newQuestion);
+      const newQuestion = prevState.questions[idx];
+      const questionCopy = {
+        ...newQuestion,
+        questionId: genId(),
+        questionRank: newQuestion.questionRank + 1,
+      };
 
-      for (let i = idx + 1; i < prevState.questions.length - 1; i++) {
-        prevState.questions[i].questionId =
-          prevState.questions[i].questionId + 1;
+      prevState.questions.splice(idx + 1, 0, questionCopy);
+
+      for (let [i, item] of prevState.questions.entries()) {
+        item.questionRank = i;
       }
 
       return { ...prevState };
