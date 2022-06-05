@@ -20,6 +20,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background-color: rgb(77 0 63 / 25%);
 }
 
 .page-wrapper {
@@ -61,4 +62,14 @@ body {
 .sider-search-wrapper {
   display: flex;
   justify-content: center;
+}
+
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+:is(.form-name-wrapper, .form-question-wrapper) {
+  padding: 20px;
 }

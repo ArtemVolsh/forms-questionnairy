@@ -1,4 +1,3 @@
-import React from "react";
 // eslint-disable-next-line
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -24,7 +23,17 @@ function App() {
         </div>
       );
     } else if (!isAuth) {
-      return <div className="App">Hello! Not logged 😭</div>;
+      return (
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<MainLayout />}>
+              <Route index element={<MainPage />} />
+              <Route path="login" element={<LoginPage />} />
+              <Route path="app" element={<AppPage />} />
+            </Route>
+          </Routes>
+        </div>
+      );
     }
   }
 
