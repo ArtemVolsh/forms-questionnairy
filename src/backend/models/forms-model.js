@@ -14,6 +14,7 @@ const Question = new Schema({
   questionName: { type: String, required: true },
   questionRank: { type: Number, required: true },
   questionImage: { type: Buffer },
+  questionId: { type: String, required: true },
   isQuestionMandatory: { type: Boolean, required: true },
   questionInput: { type: QuestionInput },
 });
