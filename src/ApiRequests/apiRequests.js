@@ -39,7 +39,7 @@ export const registration = (email, password) => {
 export const logoutRequest = () => {
   return async (dispatch) => {
     try {
-      const response = await AuthService.logout();
+      await AuthService.logout();
       localStorage.removeItem("token");
       dispatch(logout());
     } catch (e) {

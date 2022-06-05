@@ -80,6 +80,16 @@ class UserController {
       next(e);
     }
   }
+
+  async deleteUserById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const user = await userService.getUserById(id);
+      return res.json(user);
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 module.exports = new UserController();

@@ -5,6 +5,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "./Pages/Layouts/MainLayout";
 import { MainPage } from "./Pages/MainPage";
 import { LoginPage } from "./Pages/LoginPage";
+import { AppPage } from "./Pages/AppPage";
 
 function App() {
   const isAuth = true;
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<MainLayout />}>
               <Route index element={<MainPage />} />
               <Route path="login" element={<LoginPage />} />
+              <Route path="app" element={<AppPage />} />
             </Route>
           </Routes>
         </div>

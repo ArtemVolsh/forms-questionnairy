@@ -9,11 +9,13 @@ const ApiError = require("../exceptions/api-error");
 class UserService {
   async registration(email, password) {
     const candidate = await UserModel.findOne({ email });
+
     if (candidate) {
       throw ApiError.BadRequest(
         `User with that email: ${email} can't be registered`
       );
     }
+
     const hashPassword = await bcrypt.hash(password, 3);
     const activationLink = uuid.v4(); // v34fa-asfasf-142saf-sa-asf <= format
 
@@ -22,6 +24,7 @@ class UserService {
       password: hashPassword,
       activationLink,
     });
+
     // await mailService.sendActivationMail(
     //   email,
     //   `${process.env.API_URL}/api/activate/${activationLink}`
@@ -84,6 +87,11 @@ class UserService {
   async getAllUsers() {
     const users = await UserModel.find();
     return users;
+  }
+
+  async getUserById(id) {
+    const user = await UserModel.find(id);
+    return user;
   }
 }
 

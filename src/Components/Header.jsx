@@ -5,6 +5,7 @@ import { logoutRequest } from "../ApiRequests/apiRequests";
 
 const Header = () => {
   const isAuth = useSelector((state) => state.user.isAuth);
+  const emailState = useSelector((state) => state.user.currentUser.email);
   const dispatch = useDispatch();
 
   return (
@@ -15,6 +16,7 @@ const Header = () => {
       <div className="navigation inline-flex">
         <nav className="inline-flex">
           <Link to="/">Homepage</Link>
+          <Link to="/app">App</Link>
 
           {isAuth ? (
             <div className="inline-flex">
@@ -28,7 +30,7 @@ const Header = () => {
                 }}
                 variant="body1"
               >
-                {"<UserName>"}
+                {emailState}
               </Typography>
               <Button
                 variant="contained"

@@ -9,6 +9,7 @@ const $api = axios.create({
 
 $api.interceptors.request.use((config) => {
   config.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
+  console.log(`Hadouken ${localStorage.getItem("token")}`);
   return config;
 });
 
@@ -26,7 +27,7 @@ $api.interceptors.response.use(
     ) {
       originalRequest._isRetry = true;
       try {
-        const response = (await axios.get)(`${API_URL}/refresh`, {
+        const response = await axios.get(`${API_URL}/refresh`, {
           withCredentials: true,
         });
         localStorage.setItem("token", response.data.accessToken);
