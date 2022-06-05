@@ -15,6 +15,7 @@ import {
   Divider,
   Switch,
   Input,
+  Modal,
 } from "@mui/material";
 import {
   AddPhotoAlternate,
@@ -35,6 +36,20 @@ export const questionTypes = {
   SELECT: "SELECT",
   CHECKBOX: "CHECKBOX",
   RADIO: "RADIO",
+};
+
+const styledModal = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  backgroundColor: "whitesmoke",
+  borderRadius: "5px",
+  boxShadow: 24,
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  p: 4,
 };
 
 export const FormPage = () => {
@@ -58,43 +73,10 @@ export const FormPage = () => {
           ],
         },
       },
-      {
-        questionName: "",
-        questionRank: 1,
-        questionImage: undefined,
-        questionId: `${genId()}`,
-        isQuestionMandatory: false,
-        questionInput: {
-          questionType: questionTypes.TEXT,
-          questionOptions: [
-            {
-              optionRank: 0,
-              optionValue: "",
-            },
-          ],
-        },
-      },
-      {
-        questionName: "",
-        questionRank: 2,
-        questionImage: undefined,
-        questionId: `${genId()}`,
-        isQuestionMandatory: false,
-        questionInput: {
-          questionType: questionTypes.TEXT,
-          questionOptions: [
-            {
-              optionRank: 0,
-              optionValue: "",
-            },
-          ],
-        },
-      },
     ],
   };
 
-  const defaultQuestions = [{}];
-
+  const [deleteModal, setDeleteModal] = useState(false);
   const [form, setForm] = useState(defaultForm);
 
   const handleChange = (e) => {
@@ -145,7 +127,25 @@ export const FormPage = () => {
     });
   };
 
-  const handleInputDelete = (e, Id) => {};
+  const handleInputDelete = (e, Id) => {
+    if (form.questions.length === 1) {
+      setDeleteModal(true);
+      e.target.color = "error";
+    } else {
+      setForm((prevState) => {
+        const idx = form.questions.findIndex((item) => item.questionId === Id);
+
+        prevState.questions.splice(idx, 1);
+
+        for (let [i, item] of prevState.questions.entries()) {
+          item.questionRank = i;
+        }
+
+        return { ...prevState };
+      });
+      e.target.color = "inherit";
+    }
+  };
 
   return (
     <div className="page-wrapper">
@@ -182,6 +182,8 @@ export const FormPage = () => {
               sx={{ marginBottom: "15px" }}
               className="form-question-wrapper"
             >
+              {/** TOP TOOL PANEL */}
+
               <Stack
                 direction="row"
                 spacing={1}
@@ -250,6 +252,9 @@ export const FormPage = () => {
                   Question {question.questionRank}
                 </Button>
               </Stack>
+              {/** TOP TOOL PANEL END */}
+
+              {/** IMAGE */}
               {question.questionImage === undefined ? (
                 <Box>
                   <img src="" alt="" />
@@ -257,6 +262,7 @@ export const FormPage = () => {
               ) : (
                 <></>
               )}
+              {/** IMAGE END */}
 
               <FormInput
                 type={question.questionInput.questionType}
@@ -264,6 +270,8 @@ export const FormPage = () => {
               />
 
               <Divider sx={{ margin: "25px 0 10px 0" }} />
+
+              {/** BOTTOM TOOL PANEL */}
 
               <Stack
                 direction="row"
@@ -276,9 +284,26 @@ export const FormPage = () => {
                 >
                   <ContentCopy />
                 </IconButton>
-                <IconButton>
+                {/** DELETE BUTTON */}
+                <IconButton
+                  onClick={(e) => handleInputDelete(e, question.questionId)}
+                >
                   <DeleteForever />
                 </IconButton>
+                {/** DELETE MODAL */}
+                <Modal open={deleteModal} onClose={() => setDeleteModal(false)}>
+                  <Box sx={styledModal}>
+                    <Button
+                      onClick={() => setDeleteModal(false)}
+                      variant="outlined"
+                      color="error"
+                    >
+                      You cant delete last question!
+                    </Button>
+                  </Box>
+                </Modal>
+                {/** DELETE MODAL END */}
+
                 <Divider
                   sx={{
                     padding: "10px 0",
@@ -296,6 +321,8 @@ export const FormPage = () => {
                   />
                 </Typography>
               </Stack>
+
+              {/** BOTTOM TOOL PANEL END*/}
             </Paper>
           ))}
         </div>
