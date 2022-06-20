@@ -1,4 +1,5 @@
-import { Button, Typography } from "@mui/material";
+import { Add } from "@mui/icons-material";
+import { Button, IconButton, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { logoutRequest } from "../ApiRequests/apiRequests";
@@ -15,8 +16,8 @@ const Header = () => {
       </div>
       <div className="navigation inline-flex">
         <nav className="inline-flex">
-          <Link to="/">Homepage</Link>
-          <Link to="/app">App</Link>
+          <Link to="/">Forms</Link>
+          <Link to="/app">Users</Link>
 
           {isAuth ? (
             <div className="inline-flex">
@@ -34,9 +35,18 @@ const Header = () => {
               </Typography>
               <Button
                 variant="contained"
+                startIcon={<Add color="white" sx={{ color: "white" }} />}
+              >
+                <Link className="form-card__link" to="/create">
+                  Add Form
+                </Link>
+              </Button>
+              <Button
+                variant="contained"
                 sx={{
                   background: "white",
                   color: "black",
+                  ml: 1,
                 }}
                 onClick={() => dispatch(logoutRequest())}
               >

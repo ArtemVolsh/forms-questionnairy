@@ -1,5 +1,17 @@
 const { Schema, model } = require("mongoose");
 
+const AnswerItem = new Schema({
+  answerQuestionRank: { type: Number, required: true },
+  answerOptionRanks: [{ type: Number, required: true }],
+  answerValue: { type: String, required: true },
+  answerType: { type: String, required: true },
+});
+
+const Answer = new Schema({
+  answersArray: [{ type: AnswerItem }],
+  answersAuthor: { type: Schema.Types.ObjectId, ref: "User", required: true },
+});
+
 const QuestionOption = new Schema({
   optionRank: { type: Number, required: true },
   optionValue: { type: String, required: true },
@@ -21,9 +33,12 @@ const Question = new Schema({
 
 const FormsSchema = new Schema(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User" },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: { type: String, required: true },
+    description: { type: String },
+    formId: { type: String, required: true },
     questions: [{ type: Question }],
+    answers: [{ type: Answer }],
   },
   {
     timestamps: true,
@@ -31,25 +46,3 @@ const FormsSchema = new Schema(
 );
 
 module.exports = model("Forms", FormsSchema);
-
-// const defaultForm = {
-//   name: "",
-//   description: "",
-//   questions: [
-//     {
-//       questionName: "",
-//       questionRank: 0,
-//       questionImage: undefined,
-//       isQuestionMandatory: false,
-//       questionInput: {
-//         questionType: questionTypes.TEXT,
-//         questionOptions: [
-//           {
-//             optionRank: 0,
-//             optionValue: "",
-//           },
-//         ],
-//       },
-//     },
-//   ],
-// };

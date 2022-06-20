@@ -68,3 +68,34 @@ export const checkAuth = () => {
     }
   };
 };
+
+export const createForm = (form) => {
+  try {
+    // axios.interceptors.request.use((request) => {
+    //   console.log("Starting Request", JSON.stringify(request, null, 2));
+    //   return request;
+    // });
+
+    // axios.interceptors.response.use((response) => {
+    //   console.log("Response:", JSON.stringify(response, null, 2));
+    //   return response;
+    // });
+    axios.post(`${API_URL}/forms`, { form });
+  } catch (e) {
+    log("Create Form is failed! ❌");
+    log(e.response?.data?.message);
+  } finally {
+    log("Create Form is finished! ✅");
+  }
+};
+
+export const addAnswers = (answer, formId) => {
+  try {
+    axios.post(`${API_URL}/answer`, { answer, formId });
+  } catch (e) {
+    log("Create Anser is failed! ❌");
+    log(e.response?.data?.message);
+  } finally {
+    log("Create Anser is finished! ✅");
+  }
+};

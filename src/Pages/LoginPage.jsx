@@ -1,3 +1,4 @@
+import { TextField } from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { login, registration } from "../ApiRequests/apiRequests";
@@ -10,13 +11,13 @@ export const LoginPage = () => {
 
   return (
     <div>
-      <input
+      <TextField
         onChange={(e) => setEmail(e.target.value)}
         value={email}
         type="text"
         placeholder="Email"
       />
-      <input
+      <TextField
         onChange={(e) => setPassword(e.target.value)}
         value={password}
         type="password"

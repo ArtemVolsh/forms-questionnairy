@@ -8,7 +8,7 @@
 
 html,
 body {
-  height: 100vh;
+  min-height: 100vh;
   font-family: "Roboto", sans-serif;
 }
 
@@ -24,6 +24,12 @@ body {
 }
 
 .page-wrapper {
+  height: 100%;
+  display: flex;
+  flex: 1 0 auto;
+}
+
+.outlet {
   flex: 1 0 auto;
 }
 
@@ -74,8 +80,47 @@ body {
   padding: 20px;
 }
 
-.form-question-wrapper {
+.form-questions-wrapper {
   display: flex;
   flex-direction: column;
   gap: 15px;
+}
+
+.form-card {
+  padding: 20px;
+}
+
+.text-overflow-1 {
+  text-overflow: ellipsis;
+  overflow: hidden;
+
+  display: -webkit-box !important;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+}
+
+.text-overflow {
+  text-overflow: ellipsis;
+  overflow: hidden;
+
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+}
+
+.form-card__link {
+  text-decoration: none;
+  color: white;
+}
+
+.form-card__link:visited {
+  color: white;
+}
+
+.link-button {
+  display: inline-block;
+  height: 100%;
+  width: 100%;
 }

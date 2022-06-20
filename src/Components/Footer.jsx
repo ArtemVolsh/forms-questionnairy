@@ -1,3 +1,7 @@
 export const Footer = () => {
-  return <div></div>;
+  return (
+    <center>
+      <div style={{ padding: "20px" }}>All rights reserved</div>
+    </center>
+  );
 };

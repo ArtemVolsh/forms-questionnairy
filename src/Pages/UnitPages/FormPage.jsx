@@ -1,35 +1,22 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { v4 as genId } from "uuid";
 
 import {
-  IconButton,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   TextField,
-  Typography,
   Box,
   Button,
   Container,
-  Divider,
-  Switch,
-  Input,
   Modal,
+  Typography,
 } from "@mui/material";
-import {
-  AddPhotoAlternate,
-  ShortText,
-  CheckBox,
-  ArrowDropDownCircle,
-  RadioButtonChecked,
-  ContentCopy,
-  DeleteForever,
-  Numbers,
-} from "@mui/icons-material";
 
-import { FormInput } from "../../Components/FormInput";
-import { combineReducers } from "redux";
+import { createForm } from "../../ApiRequests/apiRequests";
+
+import { Question } from "../../Components/Question";
+import { Close, Done, Send } from "@mui/icons-material";
+import { useSelector } from "react-redux";
 
 export const questionTypes = {
   TEXT: "TEXT",
@@ -53,18 +40,23 @@ const styledModal = {
 };
 
 export const FormPage = () => {
+  // States
+  const id = useSelector((state) => state.user.currentUser.id);
+
   const defaultForm = {
     name: "",
+    user: id,
     description: "",
+    formId: genId(),
     questions: [
       {
         questionName: "",
         questionRank: 0,
-        questionImage: undefined,
-        questionId: `${genId()}`,
+        questionImage: null,
+        questionId: genId(),
         isQuestionMandatory: false,
         questionInput: {
-          questionType: questionTypes.TEXT,
+          questionType: questionTypes.SELECT,
           questionOptions: [
             {
               optionRank: 0,
@@ -76,80 +68,212 @@ export const FormPage = () => {
     ],
   };
 
-  const [deleteModal, setDeleteModal] = useState(false);
   const [form, setForm] = useState(defaultForm);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [saveModal, setSaveModal] = useState(false);
+  // States end
 
+  // Form Handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+  // Question Handlers
+  const handleQuestionChange = (e, id) => {
+    const { name, value } = e.target;
+    const idx = form.questions.findIndex((item) => item.questionId === id);
+
+    let prevArr = [...form.questions];
+    let prevItem = { ...form.questions[idx] };
+    prevItem[name] = value;
+    prevArr[idx] = prevItem;
+
+    setForm((prev) => ({ ...prev, questions: prevArr }));
   };
 
-  console.log(form);
-
-  const handleInputType = (e, Id) => {
+  const handleChangeQuestionInput = (e, id) => {
     const { value } = e.target;
-    const idx = form.questions.findIndex((item) => item.questionId === Id);
+    const idx = form.questions.findIndex((item) => item.questionId === id);
 
-    setForm((prevState) => {
-      prevState.questions[idx].questionInput.questionType = value;
-      return { ...prevState };
-    });
+    let prevArr = [...form.questions];
+    let prevItem = { ...form.questions[idx] };
+    prevItem.questionInput.questionType = value;
+    prevArr[idx] = prevItem;
+
+    setForm((prev) => ({ ...prev, questions: prevArr }));
   };
 
-  const handleInputMandatory = (e, Id) => {
-    const { checked } = e.target;
-    const idx = form.questions.findIndex((item) => item.questionId === Id);
+  const handleQuestionMandatory = (e, id) => {
+    const idx = form.questions.findIndex((item) => item.questionId === id);
 
-    setForm((prevState) => {
-      prevState.questions[idx].isQuestionMandatory = checked;
-      return { ...prevState };
-    });
+    let prevArr = [...form.questions];
+    let prevQuestion = prevArr[idx];
+
+    prevQuestion.isQuestionMandatory = !prevQuestion.isQuestionMandatory;
+
+    setForm((prev) => ({ ...prev, questions: prevArr }));
   };
 
-  const handleInputCopy = (e, Id) => {
-    setForm((prevState) => {
-      const idx = form.questions.findIndex((item) => item.questionId === Id);
+  const handleQuestionCopy = (e, id) => {
+    const idx = form.questions.findIndex((item) => item.questionId === id);
 
-      const newQuestion = prevState.questions[idx];
-      const questionCopy = {
-        ...newQuestion,
-        questionId: genId(),
-        questionRank: newQuestion.questionRank + 1,
-      };
+    let prevArr = [...form.questions];
+    let newItem = JSON.parse(JSON.stringify(form.questions[idx])); // deep copy
+    newItem.questionId = genId();
 
-      prevState.questions.splice(idx + 1, 0, questionCopy);
+    prevArr.splice(idx + 1, 0, newItem);
 
-      for (let [i, item] of prevState.questions.entries()) {
-        item.questionRank = i;
-      }
+    for (let [i, item] of prevArr.entries()) {
+      item.questionRank = i;
+    }
 
-      return { ...prevState };
-    });
+    setForm((prev) => ({ ...prev, questions: prevArr }));
   };
 
-  const handleInputDelete = (e, Id) => {
+  const handleQuestionDelete = (e, id) => {
     if (form.questions.length === 1) {
       setDeleteModal(true);
       e.target.color = "error";
     } else {
-      setForm((prevState) => {
-        const idx = form.questions.findIndex((item) => item.questionId === Id);
+      const idx = form.questions.findIndex((item) => item.questionId === id);
 
-        prevState.questions.splice(idx, 1);
+      let prevArr = [...form.questions];
 
-        for (let [i, item] of prevState.questions.entries()) {
-          item.questionRank = i;
-        }
+      prevArr.splice(idx, 1);
 
-        return { ...prevState };
-      });
-      e.target.color = "inherit";
+      for (let [i, item] of prevArr.entries()) {
+        item.questionRank = i;
+      }
+
+      setForm((prev) => ({ ...prev, questions: prevArr }));
     }
   };
+  // Option Handlers
+  const handleOptionChange = (e, id, rank) => {
+    const { name, value } = e.target;
+    const idx = form.questions.findIndex((item) => item.questionId === id);
+    const jdx = form.questions[idx].questionInput.questionOptions.findIndex(
+      (item) => item.optionRank === rank
+    );
+    let prevArr = [...form.questions];
+    let prevQ = prevArr[idx];
+    let prevOpt = prevQ.questionInput.questionOptions[jdx];
+
+    prevOpt[name] = value;
+
+    prevArr[idx] = prevQ;
+
+    setForm((prev) => ({ ...prev, questions: prevArr }));
+  };
+
+  const handleAddOption = (e, id, rank) => {
+    const idx = form.questions.findIndex((item) => item.questionId === id);
+    const jdx = form.questions[idx].questionInput.questionOptions.findIndex(
+      (item) => item.optionRank === rank
+    );
+
+    let prevArr = [...form.questions];
+    let prevQ = prevArr[idx];
+    let prevOptions = prevQ.questionInput.questionOptions;
+
+    let newOption = {
+      optionRank: jdx + 1,
+      optionValue: "",
+    };
+
+    prevOptions.splice(jdx + 1, 0, newOption);
+
+    for (let [i, item] of prevQ.questionInput.questionOptions.entries()) {
+      item.optionRank = i;
+    }
+
+    setForm((prev) => ({ ...prev, questions: prevArr }));
+  };
+
+  const handleDeleteOption = (e, id, rank) => {
+    const idx = form.questions.findIndex((item) => item.questionId === id);
+    const jdx = form.questions[idx].questionInput.questionOptions.findIndex(
+      (item) => item.optionRank === rank
+    );
+
+    if (form.questions[idx].questionInput.questionOptions.length === 1) {
+      setDeleteModal(true);
+      e.target.color = "error";
+    } else {
+      let prevArr = [...form.questions];
+      let prevQ = prevArr[idx];
+      let prevOptions = prevQ.questionInput.questionOptions;
+
+      prevOptions.splice(jdx, 1);
+
+      for (let [i, item] of prevQ.questionInput.questionOptions.entries()) {
+        item.optionRank = i;
+      }
+
+      setForm((prev) => ({ ...prev, questions: prevArr }));
+    }
+  };
+
+  const stateHandlers = {
+    handleQuestionChange,
+    handleChangeQuestionInput,
+    handleQuestionCopy,
+    handleQuestionDelete,
+    handleQuestionMandatory,
+    handleOptionChange,
+    handleAddOption,
+    handleDeleteOption,
+  };
+  // Handlers end
+  const formValidation = (form) => {};
+
+  // log("FORM LOG");
+  // log(form);
 
   return (
     <div className="page-wrapper">
       <Container sx={{ display: "flex" }} className="form-wrapper">
+        <Paper sx={{ maxWidth: "fit-content" }}>
+          <Button
+            endIcon={<Send />}
+            onClick={() => {
+              setSaveModal(true);
+            }}
+          >
+            Save
+          </Button>
+          <Modal open={saveModal} onClose={() => setSaveModal(false)}>
+            <Stack sx={styledModal} gap={1}>
+              <Typography textAlign="center">
+                Are you sure you want to save current form? <br />
+                <strong>
+                  <i>Changes would be unavailable</i>
+                </strong>
+              </Typography>
+              <Stack direction="row" gap={1}>
+                <Button
+                  onClick={() => setSaveModal(false)}
+                  variant="outlined"
+                  color="error"
+                  startIcon={<Close />}
+                >
+                  No
+                </Button>
+                <Button
+                  onClick={() => {
+                    createForm(form);
+                    setSaveModal(false);
+                  }}
+                  variant="outlined"
+                  color="success"
+                  startIcon={<Done />}
+                >
+                  Yes
+                </Button>
+              </Stack>
+            </Stack>
+          </Modal>
+        </Paper>
         <Paper className="form-name-wrapper">
           <Stack spacing={2}>
             <TextField
@@ -176,155 +300,33 @@ export const FormPage = () => {
           </Stack>
         </Paper>
         <div className="form-questions-wrapper">
+          <Button
+            variant="contained"
+            onClick={() => console.log(JSON.stringify(form, null, 2))}
+          >
+            Log Button
+          </Button>
+
           {form.questions.map((question) => (
-            <Paper
-              key={question.questionId}
-              sx={{ marginBottom: "15px" }}
-              className="form-question-wrapper"
-            >
-              {/** TOP TOOL PANEL */}
-
-              <Stack
-                direction="row"
-                spacing={1}
-                alignItems="center"
-                maxWidth="90%"
-              >
-                <TextField
-                  name="description"
-                  sx={{ flexBasis: "30%" }}
-                  onChange={handleChange}
-                  label="Your question"
-                  placeholder="Question text..."
-                  variant="filled"
-                  size="small"
-                />
-                <label htmlFor="question-upload-image">
-                  <Input
-                    sx={{ display: "none" }}
-                    accept="image/*"
-                    id="question-upload-image"
-                    type="file"
-                  />
-                  <IconButton component="span">
-                    <AddPhotoAlternate />
-                  </IconButton>
-                </label>
-                <Select
-                  name="question.questionInput.questionType"
-                  value={question.questionInput.questionType}
-                  sx={{ flexBasis: "30%" }}
-                  fullWidth
-                  onChange={(e) => handleInputType(e, question.questionId)}
-                >
-                  <MenuItem sx={{ padding: "15px" }} value={questionTypes.TEXT}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <ShortText /> <Typography>Paragraph</Typography>
-                    </Stack>
-                  </MenuItem>
-                  <MenuItem
-                    sx={{ padding: "15px" }}
-                    value={questionTypes.SELECT}
-                  >
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <ArrowDropDownCircle /> <Typography>Dropdown</Typography>
-                    </Stack>
-                  </MenuItem>
-                  <MenuItem
-                    sx={{ padding: "15px" }}
-                    value={questionTypes.CHECKBOX}
-                  >
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <CheckBox /> <Typography>Single choice</Typography>
-                    </Stack>
-                  </MenuItem>
-                  <MenuItem
-                    sx={{ padding: "15px" }}
-                    value={questionTypes.RADIO}
-                  >
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <RadioButtonChecked />{" "}
-                      <Typography>Multiple choice</Typography>
-                    </Stack>
-                  </MenuItem>
-                </Select>
-                <Button disabled startIcon={<Numbers />}>
-                  Question {question.questionRank}
-                </Button>
-              </Stack>
-              {/** TOP TOOL PANEL END */}
-
-              {/** IMAGE */}
-              {question.questionImage === undefined ? (
-                <Box>
-                  <img src="" alt="" />
-                </Box>
-              ) : (
-                <></>
-              )}
-              {/** IMAGE END */}
-
-              <FormInput
-                type={question.questionInput.questionType}
-                options={question.questionInput.questionOptions}
-              />
-
-              <Divider sx={{ margin: "25px 0 10px 0" }} />
-
-              {/** BOTTOM TOOL PANEL */}
-
-              <Stack
-                direction="row"
-                justifyContent="flex-end"
-                alignItems="center"
-                spacing={1}
-              >
-                <IconButton
-                  onClick={(e) => handleInputCopy(e, question.questionId)}
-                >
-                  <ContentCopy />
-                </IconButton>
-                {/** DELETE BUTTON */}
-                <IconButton
-                  onClick={(e) => handleInputDelete(e, question.questionId)}
-                >
-                  <DeleteForever />
-                </IconButton>
-                {/** DELETE MODAL */}
-                <Modal open={deleteModal} onClose={() => setDeleteModal(false)}>
-                  <Box sx={styledModal}>
-                    <Button
-                      onClick={() => setDeleteModal(false)}
-                      variant="outlined"
-                      color="error"
-                    >
-                      You cant delete last question!
-                    </Button>
-                  </Box>
-                </Modal>
-                {/** DELETE MODAL END */}
-
-                <Divider
-                  sx={{
-                    padding: "10px 0",
-                    background: "rgba(0, 0, 0, 0.27)",
-                  }}
-                  orientation="vertical"
-                />
-                <Typography>
-                  Mandatory
-                  <Switch
-                    checked={question.isQuestionMandatory}
-                    onChange={(e) =>
-                      handleInputMandatory(e, question.questionId)
-                    }
-                  />
-                </Typography>
-              </Stack>
-
-              {/** BOTTOM TOOL PANEL END*/}
-            </Paper>
+            <Question
+              key={"question" + question.questionId}
+              stateHandlers={stateHandlers}
+              question={question}
+            />
           ))}
+          {/** DELETE MODAL */}
+          <Modal open={deleteModal} onClose={() => setDeleteModal(false)}>
+            <Box sx={styledModal}>
+              <Button
+                onClick={() => setDeleteModal(false)}
+                variant="outlined"
+                color="error"
+              >
+                You cant delete last element!
+              </Button>
+            </Box>
+          </Modal>
+          {/** DELETE MODAL END */}
         </div>
       </Container>
     </div>
