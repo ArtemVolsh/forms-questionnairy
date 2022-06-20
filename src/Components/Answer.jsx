@@ -8,7 +8,9 @@ import {
   Container,
   Button,
   Modal,
+  Tab,
 } from "@mui/material";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { useParams } from "react-router-dom";
 import { AnswerInput } from "./AnswerInput";
 import { questionTypes } from "../Pages/UnitPages/FormPage";
@@ -27,6 +29,12 @@ const styledModal = {
   justifyContent: "center",
   alignItems: "center",
   p: 4,
+};
+
+const compareAnswers = (a, b) => {
+  if (a.answerQuestionRank > b.answerQuestionRank) return 1;
+  if (a.answerQuestionRank < b.answerQuestionRank) return -1;
+  if (a.answerQuestionRank === b.answerQuestionRank) return 0;
 };
 
 export const Answer = () => {
@@ -63,6 +71,7 @@ export const Answer = () => {
 
   const [form, setForm] = useState(defaultForm);
   const [answers, setAnswers] = useState([]);
+  console.log(form);
 
   const defaultAnswer = {
     answersAuthor: id,
@@ -73,6 +82,8 @@ export const Answer = () => {
 
   const [saveModal, setSaveModal] = useState(false);
   const [mandatoryModal, setMandatoryModal] = useState(false);
+
+  const [tabValue, setTabValue] = useState("1");
   // console.log(form);
 
   // Handlers
@@ -130,8 +141,6 @@ export const Answer = () => {
     setAnswer((prev) => ({ ...prev, answersArray: answers }));
   }, [answers]);
 
-  console.log(answer);
-
   useEffect(() => {
     axios
       .post(`http://localhost:5000/api/forms/specific`, {
@@ -140,101 +149,174 @@ export const Answer = () => {
       .then((response) => setForm(response.data.form));
   }, [formId]);
 
+  const isOwner = form.user === id;
+
   return (
     <div className="page-wrapper">
       <Container sx={{ mt: 1, display: "flex" }} className="form-wrapper">
-        <Paper className="form-name-wrapper">
-          <Stack spacing={2}>
-            <Typography fontWeight="bold" variant="h5">
-              {form.name}
-            </Typography>
-            <Typography variant="body1">{form.description}</Typography>
-          </Stack>
-        </Paper>
-        <div className="form-questions-wrapper">
-          <Button
-            variant="contained"
-            onClick={() => {
-              console.log(answers);
-              console.log(answer);
-            }}
-          >
-            Log
-          </Button>
-          {form.questions?.map((question) => (
-            <Paper
-              key={"anwser-" + question.questionId}
-              className="form-question-wrapper"
-            >
-              <Typography fontWeight="bold" variant="h5" sx={{ mb: 2 }}>
-                {question.questionName}
-                {question.isQuestionMandatory ? (
-                  <Button sx={{ ml: 2 }} variant="outlined" color="error">
-                    MANDATORY
-                  </Button>
-                ) : (
-                  <></>
-                )}
-              </Typography>
-              <AnswerInput
-                question={question}
-                type={question.questionInput.questionType}
-                stateHandlers={answerHandlers}
-              />
+        <TabContext value={tabValue}>
+          <TabList onChange={(e, value) => setTabValue(value)}>
+            <Tab sx={{ bgcolor: "white" }} label="Form" value="1" />
+            {isOwner ? (
+              <Tab sx={{ bgcolor: "white" }} label="Answers" value="2" />
+            ) : (
+              <></>
+            )}
+          </TabList>
+          <TabPanel value="1">
+            <Paper className="form-name-wrapper">
+              <Stack spacing={2}>
+                <Typography fontWeight="bold" variant="h5">
+                  {form.name}
+                </Typography>
+                <Typography variant="body1">{form.description}</Typography>
+              </Stack>
             </Paper>
-          ))}
-        </div>
-        <Button
-          onClick={() => {
-            if (handleValidation()) {
-              setSaveModal(true);
-            } else {
-              setMandatoryModal(true);
-            }
-          }}
-          variant="contained"
-          endIcon={<Send />}
-        >
-          Save and send
-        </Button>
-        <Modal open={saveModal} onClose={() => setSaveModal(false)}>
-          <Stack sx={styledModal} gap={1}>
-            <Typography textAlign="center">
-              Are you sure you want to save current answer? <br />
-              <strong>
-                <i>Changes would be unavailable</i>
-              </strong>
-            </Typography>
-            <Stack direction="row" gap={1}>
+            <div className="form-questions-wrapper">
               <Button
-                onClick={() => setSaveModal(false)}
-                variant="outlined"
-                color="error"
-                startIcon={<Close />}
-              >
-                No
-              </Button>
-              <Button
+                variant="contained"
                 onClick={() => {
-                  addAnswers(answer, formId);
-                  setSaveModal(false);
+                  console.log(answers);
+                  console.log(answer);
                 }}
-                variant="outlined"
-                color="success"
-                startIcon={<Done />}
               >
-                Yes
+                Log
               </Button>
-            </Stack>
-          </Stack>
-        </Modal>
-        <Modal open={mandatoryModal} onClose={() => setMandatoryModal(false)}>
-          <Stack sx={styledModal}>
-            <Typography textAlign="center">
-              <Button color="error">Fill the mandatory fields</Button>
-            </Typography>
-          </Stack>
-        </Modal>
+              {form.questions?.map((question) => (
+                <Paper
+                  key={"anwser-" + question.questionId}
+                  className="form-question-wrapper"
+                >
+                  <Typography fontWeight="bold" variant="h5" sx={{ mb: 2 }}>
+                    {question.questionName}
+                    {question.isQuestionMandatory ? (
+                      <Button sx={{ ml: 2 }} variant="outlined" color="error">
+                        MANDATORY
+                      </Button>
+                    ) : (
+                      <></>
+                    )}
+                  </Typography>
+                  <AnswerInput
+                    question={question}
+                    type={question.questionInput.questionType}
+                    stateHandlers={answerHandlers}
+                  />
+                </Paper>
+              ))}
+              <Button
+                sx={{ marginInline: "auto" }}
+                onClick={() => {
+                  if (handleValidation()) {
+                    setSaveModal(true);
+                  } else {
+                    setMandatoryModal(true);
+                  }
+                }}
+                variant="contained"
+                endIcon={<Send />}
+              >
+                Save and send
+              </Button>
+            </div>
+            <Modal open={saveModal} onClose={() => setSaveModal(false)}>
+              <Stack sx={styledModal} gap={1}>
+                <Typography textAlign="center">
+                  Are you sure you want to save current answer? <br />
+                  <strong>
+                    <i>Changes would be unavailable</i>
+                  </strong>
+                </Typography>
+                <Stack direction="row" gap={1}>
+                  <Button
+                    onClick={() => setSaveModal(false)}
+                    variant="outlined"
+                    color="error"
+                    startIcon={<Close />}
+                  >
+                    No
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      addAnswers(answer, formId);
+                      setSaveModal(false);
+                    }}
+                    variant="outlined"
+                    color="success"
+                    startIcon={<Done />}
+                  >
+                    Yes
+                  </Button>
+                </Stack>
+              </Stack>
+            </Modal>
+            <Modal
+              open={mandatoryModal}
+              onClose={() => setMandatoryModal(false)}
+            >
+              <Stack sx={styledModal}>
+                <Typography textAlign="center">
+                  <Button color="error">Fill the mandatory fields</Button>
+                </Typography>
+              </Stack>
+            </Modal>
+          </TabPanel>
+          {isOwner ? (
+            <TabPanel value="2">
+              <Paper className="form-name-wrapper">
+                <Stack spacing={2}>
+                  <Typography fontWeight="bold" variant="h5">
+                    Answers ({form.answers.length})
+                  </Typography>
+                </Stack>
+              </Paper>
+              <div className="form-questions-wrapper">
+                {form.answers.map((ans) => (
+                  <Paper
+                    key={ans._id}
+                    sx={{ m: "10px 0" }}
+                    className="form-question-wrapper"
+                  >
+                    <Typography fontWeight="bold" variant="h6">
+                      {ans.answersAuthor.email}
+                    </Typography>
+                    {ans.answersArray.sort(compareAnswers).map((ans1) => {
+                      const idx = form.questions.findIndex(
+                        (item) => item.questionRank === ans1.answerQuestionRank
+                      );
+                      const isCheckbox =
+                        ans1.answerType === questionTypes.CHECKBOX;
+
+                      return (
+                        <Stack key={ans1._id} sx={{ m: "5px 0" }}>
+                          <Typography className="question-top">
+                            <strong>Question:</strong>{" "}
+                            {form.questions[idx].questionName}
+                          </Typography>
+                          <Typography className="answer-bottom">
+                            {isCheckbox ? ( // TODO fix needed, no option ranks for multiple
+                              <>
+                                <strong>Answer:</strong>{" "}
+                                <i>{ans1.answerValue}</i>
+                              </>
+                            ) : (
+                              <>
+                                <strong>Answer:</strong>{" "}
+                                <i>{ans1.answerValue}</i>
+                              </>
+                            )}
+                          </Typography>
+                        </Stack>
+                      );
+                    })}
+                  </Paper>
+                ))}
+              </div>
+            </TabPanel>
+          ) : (
+            <></>
+          )}
+        </TabContext>
       </Container>
     </div>
   );

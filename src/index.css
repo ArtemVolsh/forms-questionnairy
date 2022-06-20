@@ -13,7 +13,7 @@ body {
 }
 
 #root {
-  height: 100%;
+  height: 100vh;
 }
 
 .app-wrapper {
@@ -123,4 +123,21 @@ body {
   display: inline-block;
   height: 100%;
   width: 100%;
+}
+
+.question-top {
+  background: rgb(194, 166, 253);
+  padding: 0.5rem;
+  border-radius: 5px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.answer-bottom {
+  color: white;
+  background: rgb(62, 25, 122);
+  padding: 0.5rem;
+  border-radius: 5px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }

@@ -27,7 +27,10 @@ class FormsService {
   };
 
   getFormById = async (formId) => {
-    const form = await FormsModel.findOne({ formId });
+    const form = await FormsModel.findOne({ formId }).populate({
+      path: "answers",
+      populate: { path: "answersAuthor" },
+    });
 
     return { form };
   };

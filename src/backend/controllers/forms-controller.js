@@ -31,7 +31,7 @@ class FormsController {
     try {
       const { formId } = req.body;
 
-      const form = await FormsService.getFormById(formId);
+      const form = await FormsService.getFormById(formId)
 
       return res.json(form);
     } catch (error) {

@@ -38,7 +38,12 @@ const MainPage = () => {
       >
         <h1 style={{ marginBottom: "15px" }}>Forms from {userEmail}</h1>
         <Grid
-          sx={{ display: "flex", gap: "10px", justifyContent: "center" }}
+          sx={{
+            display: "flex",
+            gap: "10px",
+            justifyContent: "center",
+            height: "100%",
+          }}
           container
         >
           {userForms.map((form) => (
